@@ -1,0 +1,157 @@
+1- 
+SELECT A.Nome, N.CodigoAluno, N.Codigo, N.Descricao, N.Valor, N.Data
+FROM Negociacao N, Aluno A 
+WHERE A.Codigo = N.CodigoAluno AND 
+A.Nome = 'João de Sousa'
+
+2- 
+SELECT GRN.CodigoGerente, G.Nome, G.Sexo, GRN.CodigoNegociacao, N.Descricao, N.Valor, GRN.Data
+FROM Gerente_Realiza_Negociacao GRN, Negociacao N, Gerente G
+Where G.Codigo = GRN.CodigoGerente AND 
+N.Codigo = GRN.CodigoNegociacao
+ORDER BY G.Sexo, G.Nome
+
+3- 
+SELECT N.CodigoAluno, A.Nome, N.Codigo AS CodigoNegociacao, N.Descricao, N.Valor, N.Data
+FROM ALUNO A, Negociacao N JOIN Pagamento P ON N.Codigo = P.CodigoNegociacao AND P.Quitada = false
+WHERE A.Codigo = N.CodigoAluno AND 
+A.Nome = 'João de Sousa'
+
+4- 
+SELECT G.Codigo AS Gerente, G.Nome, G.Sexo, N.Codigo AS CodigoNegociacao, N.Descricao, N.Valor, GRN.Data
+FROM GERENTE G, NEGOCIACAO N, PAGAMENTO P, GERENTE_Realiza_NEGOCIACAO GRN
+WHERE G.Codigo = GRN.CodigoGerente AND 
+GRN.CodigoNegociacao = N.Codigo AND
+P.CodigoNegociacao = GRN.CodigoNegociacao AND
+P.Quitada = false AND
+GRN.CodigoGerente IN
+(SELECT Codigo
+FROM GERENTE
+WHERE Nome = 'Valesca Maria da Costa')
+
+5- 
+SELECT A.Codigo AS Aluno, A.Nome, A.Sexo, N.Codigo AS Negociacao, N.Descricao, N.Valor, P.Codigo AS Produto, P.Nome, P.Preco, P.Marca, P.Quantidade 
+FROM Negociacao N, Aluno A, Produto P, Negociacao_Contem_Produto NCP
+WHERE A.Nome = 'João de Sousa' AND 
+N.Codigo = NCP.CodigoNegociacao AND 
+P.Codigo = NCP.CodigoProduto AND 
+N.CodigoAluno = A.Codigo
+
+6-
+SELECT A.Codigo, A.Nome, M.Valor, M.DataPagamento AS DataPagamentoPrevista, M.DataRecibo AS DataRealizacaoPagamento
+FROM ALUNO A, MENSALIDADE M
+WHERE A.Codigo = M.CodigoAluno
+
+7-
+SELECT A.Codigo, A.Nome, N.CNPJouCPF,  N.Codigo, N.Descricao, N.Valor, N.Data 
+FROM (ALUNO A LEFT OUTER JOIN NEGOCIACAO N ON A.Codigo = N.CodigoAluno)
+
+8-
+SELECT *
+FROM MEDIDAS M
+WHERE M.Codigo IN
+(SELECT PA.CodigoMedidas
+ FROM PROFESSOR_ALUNO PA
+ WHERE PA.Data = '2017-04-05' AND 
+ PA.CodigoAluno IN
+(SELECT Codigo
+ FROM ALUNO
+ WHERE Nome = 'Joana Pereira de Sousa'))
+
+9- 
+SELECT A.Nome, T.Tipo AS TipoTreino, ATT.DataInicio, ATT.Duracao, T.Descricao, E.Codigo AS CodigoExercicio, E.Tipo, E.Series, E.Repeticoes, E.Nome, E.Musculo, E.DropSet
+FROM ALUNO A, TREINO T, ALUNO_Tem_TREINO ATT, EXERCICIO E, TREINO_Tem_EXERCICIO TTE
+WHERE ATT.CodigoTreino = T.Codigo AND
+TTE.CodigoExercicio = E.Codigo AND
+TTE.CodigoTreino = ATT.CodigoTreino AND
+ATT.CodigoAluno = A.Codigo AND
+A.Codigo IN
+(SELECT Codigo
+ FROM ALUNO
+ WHERE Nome = 'João de Sousa')
+
+10- 
+(SELECT A.Nome, M.Codigo AS Matricula
+FROM ALUNO A, MATRICULA M, NEGOCIACAO N, PRODUTO P, NEGOCIACAO_CONTEM_PRODUTO NCP
+WHERE P.Nome = 'Whey Protein' AND 
+A.Codigo = N.CodigoAluno AND 
+P.Codigo = NCP.CodigoProduto AND 
+N.Codigo = NCP.CodigoNegociacao AND 
+A.Codigo = M.CodigoAluno)
+INTERSECT 
+(SELECT A.Nome, M.Codigo AS MAtricula 
+ FROM ALUNO A, MATRICULA M)
+
+11- 
+SELECT Nome, Sexo, Salario
+FROM PROFESSOR
+ORDER BY Sexo, Nome
+
+12- 
+SELECT COUNT(*) NumeroAlunosAtivos
+FROM MATRICULA
+WHERE DataTrancamento IS NULL OR 
+DataTrancamento > (SELECT CURRENT_DATE)
+
+13-
+(SELECT A.Codigo, A.Nome AS NomeAluno, P.Nome
+FROM ALUNO A, PRODUTO P, NEGOCIACAO N, Negociacao_Contem_Produto NCP
+WHERE A.Codigo = N.CodigoAluno AND 
+P.Codigo = NCP.CodigoProduto AND 
+N.Codigo = NCP.CodigoNegociacao
+GROUP BY A.Codigo, A.Nome, P.Nome)
+INTERSECT 
+(SELECT A.Codigo, A.Nome, P.Nome 
+ FROM ALUNO A, PRODUTO P)
+ORDER BY NomeAluno
+
+14- 
+SELECT P.Nome AS Professor, A.Nome AS Aluno, T.Tipo AS TipoTreino, T.Descricao
+FROM ALUNO A, TREINO T, ALUNO_Tem_TREINO ATT, PROFESSOR P, PROFESSOR_EXERCICIO PE
+WHERE ATT.CodigoTreino = PE.CodigoTreino AND
+PE.CodigoProfessor = P.Codigo AND
+ATT.CodigoAluno = A.Codigo AND
+T.Codigo = ATT.CodigoTreino AND
+A.Codigo IN
+(SELECT Codigo
+ FROM ALUNO
+ WHERE Nome = 'Pedro da Silva')
+
+15- 
+SELECT A.Nome
+FROM ALUNO A, MENSALIDADE M
+WHERE A.Codigo = M.CodigoAluno AND M.DataPagamento IS NULL
+
+16- 
+SELECT A.Nome
+FROM ALUNO A
+WHERE A.Nome LIKE 'J%' OR A.Nome LIKE 'R%'
+
+17- 
+SELECT P.Nome
+FROM PROFESSOR P
+WHERE P.Nome LIKE 'Andr%' AND P.Sexo = 'F' AND P.Salario > 1000
+
+18- 
+SELECT A.Nome
+FROM ALUNO A
+WHERE EXISTS 
+(SELECT * FROM NEGOCIACAO N
+WHERE A.Codigo = N.CodigoAluno AND N.Tipo = 'Venda' AND NOT EXISTS
+(SELECT * FROM PAGAMENTO P
+WHERE N.Codigo = P.CodigoNegociacao AND P.Quitada = true))
+
+19- 
+SELECT DISTINCT G.Nome
+FROM GERENTE G, GERENTE_Realiza_NEGOCIACAO GRN
+WHERE EXISTS 
+(SELECT * FROM NEGOCIACAO N 
+WHERE G.Codigo = GRN.CodigoGerente AND N.Codigo = GRN.CodigoNegociacao AND N.Tipo = 'Compra' AND NOT EXISTS
+(SELECT * FROM PAGAMENTO P
+WHERE GRN.CodigoNegociacao = P.CodigoNegociacao AND P.Quitada = true))
+
+20-
+SELECT COUNT(*) AS QuantidadeAlunosSexoMasculino 
+FROM ALUNO A
+WHERE A.Sexo = 'M'
+GROUP BY A.Sexo

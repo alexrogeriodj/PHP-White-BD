@@ -1,0 +1,636 @@
+CREATE TABLE ALUNO(
+	Codigo INT,
+	Nome VARCHAR(100) NOT NULL,
+	Sexo CHAR NOT NULL,
+	Idade INT NOT NULL,
+	Peso REAL NOT NULL,
+	Altura REAL NOT NULL,
+	BF VARCHAR(4) NOT NULL,
+	IMC REAL NOT NULL,
+	Telefone VARCHAR(20),
+	EstadoSaude VARCHAR(50) NOT NULL,
+	Objetivo VARCHAR(100) NOT NULL,
+	CONSTRAINT  AlunoPK PRIMARY KEY (Codigo),
+        CHECK(Peso>0),
+        CHECK(Altura>0)
+);
+
+CREATE TABLE MATRICULA(
+	Codigo INT,
+        CodigoAluno INT NOT NULL UNIQUE,
+	DataAbertura DATE NOT NULL,
+	DataTrancamento DATE,
+        CONSTRAINT  MatriculaPK PRIMARY KEY (Codigo),
+	CONSTRAINT MatriculaFK FOREIGN KEY (CodigoAluno) 
+		REFERENCES ALUNO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE MENSALIDADE(
+	Codigo INT,
+	CodigoAluno INT NOT NULL UNIQUE,
+	Valor REAL NOT NULL,
+	DataRecibo DATE,
+	DataPagamento DATE,
+	CONSTRAINT MensalidadePK PRIMARY KEY (Codigo),
+	CONSTRAINT MensalidadeFK FOREIGN KEY (CodigoAluno)
+		REFERENCES ALUNO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CHECK(Valor>0)	
+
+);
+
+CREATE TABLE TREINO(
+	Codigo INT,
+	Tipo VARCHAR(10) NOT NULL,
+	DescansoEntreSeries VARCHAR(5) NOT NULL,
+	UsoDeCarga VARCHAR(10) NOT NULL,
+	DescansoEntreRepeticoes VARCHAR(5) NOT NULL,
+	DescansoEntreCiclo INT NOT NULL,
+	Descricao VARCHAR(200),
+	CONSTRAINT TreinoPK PRIMARY KEY (Codigo)
+);
+
+CREATE TABLE ALUNO_Tem_TREINO(
+	CodigoAluno INT,
+	CodigoTreino INT,
+	Duracao INT NOT NULL,
+	DataInicio DATE NOT NULL,
+	CONSTRAINT Aluno_Tem_TreinoPK PRIMARY KEY (CodigoAluno, CodigoTreino),
+        CONSTRAINT Aluno_Tem_TreinoFK FOREIGN KEY (CodigoAluno) 
+        	REFERENCES ALUNO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Aluno_Tem_TreinoFK2 FOREIGN KEY (Codigotreino) 
+        	REFERENCES TREINO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE EXERCICIO(
+	Codigo INT,
+	Tipo VARCHAR(5) NOT NULL,
+	Series INT NOT NULL,
+	Repeticoes INT NOT NULL,
+	Nome VARCHAR(100) NOT NULL,
+	Musculo VARCHAR(50) NOT NULL,
+	DropSet BOOLEAN NOT NULL,
+	CONSTRAINT ExercicioPK PRIMARY KEY (Codigo),
+        CHECK(Series>0),
+        CHECK(Repeticoes>6)
+);
+
+CREATE TABLE TREINO_Tem_EXERCICIO(
+	CodigoTreino INT,
+	CodigoExercicio INT,
+	CONSTRAINT Treino_Tem_ExercicioPK PRIMARY KEY (CodigoTreino, CodigoExercicio),
+        CONSTRAINT Treino_Tem_ExercicioFK FOREIGN KEY (CodigoTreino) 
+        	REFERENCES TREINO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Treino_Tem_ExercicioFK2 FOREIGN KEY (CodigoExercicio) 
+        	REFERENCES EXERCICIO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE PROFESSOR(
+        CPF VARCHAR(14) NOT NULL UNIQUE,
+        Sexo CHAR NOT NULL,
+        Nome VARCHAR(100) NOT NULL,
+	Codigo INT,
+        DataPagamento DATE NOT NULL,
+	Salario REAL NOT NULL,
+	CONSTRAINT ProfessorPK PRIMARY KEY (Codigo),
+        CHECK(Salario>0)
+);
+
+CREATE TABLE EspecialidadePROFESSOR(
+	CodigoProfessor INT,
+	Especialidade VARCHAR(100),
+	CONSTRAINT EspecialidadeProfessorPK PRIMARY KEY (CodigoProfessor, Especialidade),
+        CONSTRAINT EspecialidadeProfessorFK FOREIGN KEY (CodigoProfessor) 
+        	REFERENCES PROFESSOR(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+); 
+
+CREATE TABLE PROFESSOR_EXERCICIO(
+	CodigoProfessor INT,
+	CodigoTreino INT,
+	CodigoExercicio INT,
+	CONSTRAINT Professor_ExercicioPK PRIMARY KEY (CodigoProfessor, 
+		CodigoTreino, CodigoExercicio),
+        CONSTRAINT Professor_ExercicioFK FOREIGN KEY (CodigoProfessor) 
+        	REFERENCES PROFESSOR(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Professor_ExercicioFK2 FOREIGN KEY (CodigoTreino) 
+        	REFERENCES TREINO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Professor_ExercicioFK3 FOREIGN KEY (CodigoExercicio) 
+        	REFERENCES EXERCICIO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+); 
+
+CREATE TABLE GERENTE(
+	Codigo INT,
+        CPF VARCHAR(14) NOT NULL UNIQUE,
+        Sexo CHAR NOT NULL,
+	Nome VARCHAR(100) NOT NULL,
+	DataPagamento DATE NOT NULL,
+	CONSTRAINT GerentePK PRIMARY KEY (Codigo)
+);
+
+CREATE TABLE DESPESA(
+	Codigo INT,
+        Descricao VARCHAR(100) NOT NULL,
+	Valor REAL NOT NULL,
+        Data DATE NOT NULL,
+	CONSTRAINT DespesaPK PRIMARY KEY (Codigo)
+);
+
+CREATE TABLE GERENTE_Gerencia_DESPESA(
+	CodigoGerente INT,
+	CodigoDespesa INT,
+	CONSTRAINT GERENTE_Gerencia_DESPESAPK PRIMARY KEY (CodigoGerente, CodigoDespesa),
+        CONSTRAINT Gerente_Gerencia_DespesaFK FOREIGN KEY (CodigoGerente) 
+        	REFERENCES GERENTE(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Gerente_Gerencia_DespesaFK2 FOREIGN KEY (CodigoDespesa) 
+        	REFERENCES DESPESA(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE NEGOCIACAO(
+	Codigo INT,
+	CodigoAluno INT,
+	CNPJouCPF VARCHAR(20) NOT NULL,
+	Descricao VARCHAR(100) NOT NULL,
+	Valor REAL NOT NULL,
+	Data DATE,
+        Tipo VARCHAR(6) NOT NULL,
+	CONSTRAINT NegociacaoPK PRIMARY KEY (Codigo),
+	CONSTRAINT NegociacaoFK FOREIGN KEY (CodigoAluno)
+		REFERENCES ALUNO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CHECK(Valor>0)
+);
+
+CREATE TABLE PAGAMENTO(
+	Codigo INT,
+        CodigoNegociacao INT NOT NULL UNIQUE,
+	ValorParcela REAL NOT NULL,
+	Quitada BOOLEAN NOT NULL,
+	Parcelas INT NOT NULL,
+        Desconto REAL NOT NULL,
+	CONSTRAINT CompraAprazoPK PRIMARY KEY (Codigo),
+        CONSTRAINT PagamentoFK FOREIGN KEY (CodigoNegociacao)
+		REFERENCES NEGOCIACAO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CHECK(ValorParcela>0),
+        CHECK(Parcelas>0 AND Parcelas<=10)  
+);
+
+CREATE TABLE GERENTE_Realiza_NEGOCIACAO(
+	CodigoGerente INT,
+	CodigoNegociacao INT,
+	Data DATE NOT NULL,
+	CONSTRAINT Gerente_Realiza_NegociacaoPK PRIMARY KEY (CodigoGerente, CodigoNegociacao),
+        CONSTRAINT Gerente_Realiza_NegociacaoFK FOREIGN KEY (CodigoGerente)
+		REFERENCES GERENTE(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Gerente_Realiza_NegociacaoFK2 FOREIGN KEY (CodigoNegociacao)
+		REFERENCES NEGOCIACAO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE PRODUTO(
+	Codigo INT,
+	Preco REAL NOT NULL,
+	Nome VARCHAR(100) NOT NULL,
+	Marca VARCHAR(50) NOT NULL,
+	Quantidade INT NOT NULL,
+	CONSTRAINT PRODUTOPK PRIMARY KEY (Codigo),
+        CHECK(Preco>0),
+        CHECK(Quantidade>0)
+);
+
+CREATE TABLE NEGOCIACAO_Contem_PRODUTO(
+	CodigoNegociacao INT,
+	CodigoProduto INT,
+	CONSTRAINT Negociacao_Contem_ProdutoPK PRIMARY KEY (CodigoNegociacao, CodigoProduto),
+        CONSTRAINT Negociacao_Contem_ProdutoFK FOREIGN KEY (CodigoNegociacao)
+		REFERENCES NEGOCIACAO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Negociacao_Contem_ProdutoFK2 FOREIGN KEY (CodigoProduto)
+		REFERENCES Produto(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE MEDIDAS(
+	Codigo INT,
+	Abdome REAL NOT NULL,
+	CoxaDireita REAL NOT NULL,
+	CoxaEsquerda REAL NOT NULL,
+	BracoDireito REAL NOT NULL,
+	BracoEsquerdo REAL NOT NULL,
+	Peitoral REAL NOT NULL,
+	AntebracoDireito REAL NOT NULL,
+	AntebracoEsquerdo REAL NOT NULL,
+	Deltoides REAL NOT NULL,
+        PanturrilhaEsquerda REAL NOT NULL,
+	PanturrilhaDireita REAL NOT NULL,
+	CONSTRAINT MEDIDASPK PRIMARY KEY (Codigo)
+);
+
+CREATE TABLE PROFESSOR_ALUNO(
+	CodigoProfessor INT,
+        CodigoMedidas INT,
+	CodigoAluno INT,
+	Data DATE NOT NULL,
+	CONSTRAINT Professor_AlunoPK PRIMARY KEY (CodigoProfessor, CodigoAluno, CodigoMedidas),
+        CONSTRAINT Professor_AlunoFK FOREIGN KEY (CodigoProfessor)
+		REFERENCES PROFESSOR(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Professor_AlunoFK2 FOREIGN KEY (CodigoAluno)
+		REFERENCES ALUNO(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT,
+        CONSTRAINT Professor_AlunoFK3 FOREIGN KEY (CodigoMedidas)
+		REFERENCES MEDIDAS(Codigo)
+	ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+INSERT INTO ALUNO(Codigo, Nome, Sexo, Idade, Peso, Altura, BF, IMC, Telefone, EstadoSaude, Objetivo)
+VALUES(11111, 'João de Sousa', 'M', 20, 80.8, 1.70, '20%', 27.7, '(83) 99834-0672', 'Acima do Peso', 'Emagrecimento');
+INSERT INTO ALUNO(Codigo, Nome, Sexo, Idade, Peso, Altura, BF, IMC, Telefone, EstadoSaude, Objetivo) 
+VALUES(11112, 'Pedro da Silva', 'M', 25, 75.3, 1.65, '18%', 27.5, '(83) 99939-4097', 'Acima do Peso', 'Emagrecimento');
+INSERT INTO ALUNO(Codigo, Nome, Sexo, Idade, Peso, Altura, BF, IMC, Telefone, EstadoSaude, Objetivo) 
+VALUES(11113, 'Maria do Carmo Pereira', 'F', 19, 58.7, 1.62, '15%', 22.1, '(83) 99834-0672', 'Peso Normal', 'Hipertrofia Muscular');
+INSERT INTO ALUNO(Codigo, Nome, Sexo, Idade, Peso, Altura, BF, IMC, Telefone, EstadoSaude, Objetivo) 
+VALUES(11114, 'Francisco Carlos de Araújo', 'M', 28, 85.4, 1.74, '26%', 28.1, '(83) 99476-9835', 'Acima do Peso', 'Emagrecimento');
+INSERT INTO ALUNO(Codigo, Nome, Sexo, Idade, Peso, Altura, BF, IMC, Telefone, EstadoSaude, Objetivo) 
+VALUES(11115, 'Joana Pereira de Sousa', 'F', 18, 56.2, 1.65, '12%', 20.6, '(83) 99855-4568', 'Peso Normal', 'Hipertrofia Muscular');
+
+INSERT INTO MATRICULA(Codigo, CodigoAluno, DataAbertura, DataTrancamento) 
+VALUES(22222, 11111, '02/01/2017', '02/03/2017');
+INSERT INTO MATRICULA(Codigo, CodigoAluno, DataAbertura, DataTrancamento)  
+VALUES(22223, 11112, '05/01/2017', null);
+INSERT INTO MATRICULA(Codigo, CodigoAluno, DataAbertura, DataTrancamento)  
+VALUES(22224, 11113, '07/01/2017', null);
+INSERT INTO MATRICULA(Codigo, CodigoAluno, DataAbertura, DataTrancamento)  
+VALUES(22225, 11114, '10/01/2017', null);
+INSERT INTO MATRICULA(Codigo, CodigoAluno, DataAbertura, DataTrancamento)  
+VALUES(22226, 11115, '15/01/2017', null);
+
+INSERT INTO MENSALIDADE(Codigo, CodigoAluno, Valor, DataRecibo, DataPagamento) 
+VALUES(33333, 11111, 50, '15/02/2017', '02/02/2017');
+INSERT INTO MENSALIDADE(Codigo, CodigoAluno, Valor, DataRecibo, DataPagamento) 
+VALUES(33334, 11112, 50, '05/03/2017', '05/03/2017');
+INSERT INTO MENSALIDADE(Codigo, CodigoAluno, Valor, DataRecibo, DataPagamento) 
+VALUES(33335, 11113, 50, '09/03/2017', '07/03/2017');
+INSERT INTO MENSALIDADE(Codigo, CodigoAluno, Valor, DataRecibo, DataPagamento) 
+VALUES(33336, 11114, 50, '18/03/2017', '10/03/2017');
+INSERT INTO MENSALIDADE(Codigo, CodigoAluno, Valor, DataRecibo, DataPagamento) 
+VALUES(33337, 11115, 50, '15/03/2017', '15/03/2017');
+
+INSERT INTO TREINO(Codigo, Tipo, DescansoEntreSeries, UsoDeCarga, DescansoEntreRepeticoes, DescansoEntreCiclo, Descricao)
+VALUES(44444, 'A', '30s', 'Moderada', '1m', 2, 'Perda de Peso');
+INSERT INTO TREINO(Codigo, Tipo, DescansoEntreSeries, UsoDeCarga, DescansoEntreRepeticoes, DescansoEntreCiclo, Descricao) 
+VALUES(44445, 'B', '30s', 'Leve', '1m', 1, 'Perda de Peso');
+INSERT INTO TREINO(Codigo, Tipo, DescansoEntreSeries, UsoDeCarga, DescansoEntreRepeticoes, DescansoEntreCiclo, Descricao) 
+VALUES(44446, 'C', '30s', 'Pesada', '1m', 3, 'Ganho de Massa Muscular');
+INSERT INTO TREINO(Codigo, Tipo, DescansoEntreSeries, UsoDeCarga, DescansoEntreRepeticoes, DescansoEntreCiclo, Descricao) 
+VALUES(44447, 'D', '30s', 'Pesada', '1m', 3, 'Ganho de Massa Muscular');
+INSERT INTO TREINO(Codigo, Tipo, DescansoEntreSeries, UsoDeCarga, DescansoEntreRepeticoes, DescansoEntreCiclo, Descricao) 
+VALUES(44448, 'E', '30s', 'Moderada', '1m', 2, 'Perda de Peso');
+INSERT INTO TREINO(Codigo, Tipo, DescansoEntreSeries, UsoDeCarga, DescansoEntreRepeticoes, DescansoEntreCiclo, Descricao) 
+VALUES(44449, 'F', '30s', 'Moderada', '1m', 2, 'Perda de Peso');
+
+INSERT INTO ALUNO_Tem_TREINO(CodigoAluno, CodigoTreino, Duracao, DataInicio) 
+VALUES(11111, 44444, 2, '02/02/2017');
+INSERT INTO ALUNO_Tem_TREINO(CodigoAluno, CodigoTreino, Duracao, DataInicio)  
+VALUES(11112, 44445, 2, '05/03/2017');
+INSERT INTO ALUNO_Tem_TREINO(CodigoAluno, CodigoTreino, Duracao, DataInicio)  
+VALUES(11113, 44446, 2, '07/04/2017');
+INSERT INTO ALUNO_Tem_TREINO(CodigoAluno, CodigoTreino, Duracao, DataInicio)  
+VALUES(11114, 44447, 2, '10/03/2017');
+INSERT INTO ALUNO_Tem_TREINO(CodigoAluno, CodigoTreino, Duracao, DataInicio)  
+VALUES(11115, 44448, 2, '15/03/2017');
+
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55555, 'A', 3, 12, 'Supino Declinado com Halteres', 'Peitoral', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet)
+VALUES(55556, 'A', 3, 12, 'Crucifixo', 'Peitoral', false);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet)
+VALUES(55557, 'A', 3, 12, 'Pec Deck', 'Peitoral', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet)
+VALUES(55558, 'B', 3, 12, 'Puxada Atrás com Polia Alta', 'Dorsais', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet)
+VALUES(55559, 'B', 3, 12, 'Remada com Halter', 'Dorsais', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet)
+VALUES(55510, 'B', 3, 12, 'Pillover na Polia Alta com Barra', 'Dorsais', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55511, 'C', 3, 12, 'Agachamento com Barra', 'Pernas', false);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55512, 'C', 3, 12, 'Bom Dia', 'Pernas', false);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55513, 'C', 3, 12, 'Máquina Adutora', 'Pernas', false);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55514, 'D', 3, 12, 'Remada Alta com Barra', 'Ombros', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55515, 'D', 3, 12, 'Press Militar com Barra à Nuca', 'Ombros', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55516, 'D', 3, 12, 'Elevações Frontais com Halteres', 'Ombros', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55517, 'E', 3, 12, 'Testa Inclinado', 'Bíceps, Tríceps e Antebraços', false);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55518, 'E', 3, 12, 'Rosca Direta Barra', 'Bíceps, Tríceps e Antebraços', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55519, 'E', 3, 12, 'Rosca Pronada', 'Bíceps, Tríceps e Antebraços', false);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55520, 'F', 3, 12, 'Supra Abdominal', 'Peitoral, Ombros', true);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55521, 'F', 3, 12, 'Infra Abdominal', 'Abdome', false);
+INSERT INTO EXERCICIO(Codigo, Tipo, Series, Repeticoes, Nome, Musculo, DropSet) 
+VALUES(55522, 'F', 3, 12, 'Elevações de Pernas Tipo Burro', 'Pernas', false);
+
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44444, 55555);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44444, 55556);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44444, 55557);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44445, 55558);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44445, 55559);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44445, 55510);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44446, 55511);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44446, 55512);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44446, 55513);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44447, 55514);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44447, 55515);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44447, 55516);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44448, 55517);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44448, 55518);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44448, 55519);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44449, 55520);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44449, 55521);
+INSERT INTO TREINO_Tem_EXERCICIO(CodigoTreino, CodigoExercicio) 
+VALUES(44449, 55522);
+ 
+INSERT INTO PROFESSOR(CPF, Sexo, Nome, Codigo, DataPagamento, Salario) 
+VALUES('111.111.111-01', 'M', 'José Ricardo Oliveira', 66666, '01/04/2017', 1000);
+INSERT INTO PROFESSOR(CPF, Sexo, Nome, Codigo, DataPagamento, Salario)  
+VALUES('222.222.333-02', 'M', 'André de Sousa Dias', 66667, '02/04/2017', 1000);
+INSERT INTO PROFESSOR(CPF, Sexo, Nome, Codigo, DataPagamento, Salario)  
+VALUES('333.333.333-03', 'M', 'Marcos Rogerio da Costa', 66668, '03/04/2017', 1000);
+INSERT INTO PROFESSOR(CPF, Sexo, Nome, Codigo, DataPagamento, Salario)  
+VALUES('444.444.444-04', 'M', 'Alexandre da Silva Cartaxo', 66669, '04/04/2017', 1000);
+INSERT INTO PROFESSOR(CPF, Sexo, Nome, Codigo, DataPagamento, Salario)  
+VALUES('555.555.555-05', 'F', 'Andréia Rodrigues de Oliveira', 66610, '05/04/2017', 1500);
+
+INSERT INTO EspecialidadePROFESSOR(CodigoProfessor, Especialidade) 
+VALUES(66666, 'Educador Físico');
+INSERT INTO EspecialidadePROFESSOR(CodigoProfessor, Especialidade)  
+VALUES(66667, 'Educador Físico');
+INSERT INTO EspecialidadePROFESSOR(CodigoProfessor, Especialidade)  
+VALUES(66668, 'Educador Físico');
+INSERT INTO EspecialidadePROFESSOR(CodigoProfessor, Especialidade)  
+VALUES(66669, 'Educador Físico');
+INSERT INTO EspecialidadePROFESSOR(CodigoProfessor, Especialidade)  
+VALUES(66610, 'Personal Trainer');
+
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66666, 44444, 55555);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66666, 44444, 55556);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66666, 44444, 55557);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66667, 44445, 55558);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66667, 44445, 55559);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66667, 44445, 55510);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66668, 44446, 55511);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66668, 44446, 55512);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66668, 44446, 55513);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66669, 44447, 55514);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66669, 44447, 55515);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66669, 44447, 55516);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66610, 44448, 55517);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66610, 44448, 55518);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66610, 44448, 55519);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66610, 44449, 55520);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66610, 44449, 55521);
+INSERT INTO PROFESSOR_EXERCICIO(CodigoProfessor, CodigoTreino, CodigoExercicio) 
+VALUES(66610, 44449, 55522);
+
+INSERT INTO GERENTE(Codigo, CPF, Sexo, Nome, DataPagamento) 
+VALUES(77777, '666.666.666-06', 'M', 'Felipe Augusto Vilela', '01/04/2017');
+INSERT INTO GERENTE(Codigo, CPF, Sexo, Nome, DataPagamento) 
+VALUES(77778, '777.777.777-07', 'M', 'Sérgio Brito Ferrari', '02/04/2017');
+INSERT INTO GERENTE(Codigo, CPF, Sexo, Nome, DataPagamento) 
+VALUES(77779, '888.888.888-08', 'F', 'Valesca Maria da Costa', '03/04/2017');
+INSERT INTO GERENTE(Codigo, CPF, Sexo, Nome, DataPagamento) 
+VALUES(77710, '999.999.999-09', 'M', 'Cristovão de Lima', '04/04/2017');
+INSERT INTO GERENTE(Codigo, CPF, Sexo, Nome, DataPagamento) 
+VALUES(77711, '101.101.101-10', 'M', 'Fernando Pereira Belém', '05/04/2017');
+
+INSERT INTO DESPESA(Codigo, Descricao, Valor, Data) 
+VALUES(88888, 'Água, Energia', 500, '01/04/2017');
+INSERT INTO DESPESA(Codigo, Descricao, Valor, Data) 
+VALUES(88889, 'Água, Energia', 600, '02/04/2017');
+INSERT INTO DESPESA(Codigo, Descricao, Valor, Data) 
+VALUES(88810, 'Água, Energia', 400, '03/04/2017');
+INSERT INTO DESPESA(Codigo, Descricao, Valor, Data) 
+VALUES(88811, 'Água, Energia', 700, '04/04/2017');
+INSERT INTO DESPESA(Codigo, Descricao, Valor, Data) 
+VALUES(88812, 'Água, Energia', 200, '05/04/2017');
+
+INSERT INTO GERENTE_Gerencia_DESPESA(CodigoGerente, CodigoDespesa) 
+VALUES(77777, 88888);
+INSERT INTO GERENTE_Gerencia_DESPESA(CodigoGerente, CodigoDespesa) 
+VALUES(77778, 88889);
+INSERT INTO GERENTE_Gerencia_DESPESA(CodigoGerente, CodigoDespesa) 
+VALUES(77779, 88810);
+INSERT INTO GERENTE_Gerencia_DESPESA(CodigoGerente, CodigoDespesa) 
+VALUES(77710, 88811);
+INSERT INTO GERENTE_Gerencia_DESPESA(CodigoGerente, CodigoDespesa) 
+VALUES(77711, 88812);
+
+INSERT INTO NEGOCIACAO(Codigo, CodigoAluno, CNPJouCPF, Descricao, Valor, Data, Tipo) 
+VALUES(99999, 11111, '666.666.666-06', 'Hipertróficos', 900, '01/03/2017', 'Venda');
+INSERT INTO NEGOCIACAO(Codigo, CodigoAluno, CNPJouCPF, Descricao, Valor, Data, Tipo) 
+VALUES(99913, null, '11.111.111/1111-11', 'Pastas Proteicas', 95.04, null, 'Compra');
+INSERT INTO NEGOCIACAO(Codigo, CodigoAluno, CNPJouCPF, Descricao, Valor, Data, Tipo) 
+VALUES(99914, null, '11.111.111/1111-11', 'Hipertróficos', 1800, null, 'Compra');
+INSERT INTO NEGOCIACAO(Codigo, CodigoAluno, CNPJouCPF, Descricao, Valor, Data, Tipo) 
+VALUES(99915, null, '22.222.222/2222-22', 'Barras Cereais', 590, null, 'Compra');
+INSERT INTO NEGOCIACAO(Codigo, CodigoAluno, CNPJouCPF, Descricao, Valor, Data, Tipo) 
+VALUES(99916, null, '33.333.333/3333-33', 'Energéticos', 1500, null, 'Compra');
+INSERT INTO NEGOCIACAO(Codigo, CodigoAluno, CNPJouCPF, Descricao, Valor, Data, Tipo) 
+VALUES(99917, null, '44.444.444/4444-44', 'Termogênicos', 3000, null, 'Compra');
+INSERT INTO NEGOCIACAO(Codigo, CodigoAluno, CNPJouCPF, Descricao, Valor, Data, Tipo) 
+VALUES(99918, 11111, '666.666.666-06', 'Termogênicos', 300, '01/03/2017', 'Venda');
+
+INSERT INTO PAGAMENTO(Codigo, CodigoNegociacao, ValorParcela, Quitada, Parcelas, Desconto) 
+VALUES(54321, 99999, 100, false, 9, 0);
+INSERT INTO PAGAMENTO(Codigo, CodigoNegociacao, ValorParcela, Quitada, Parcelas, Desconto) 
+VALUES(98765, 99918, 50, false, 6, 0);
+INSERT INTO PAGAMENTO(Codigo, CodigoNegociacao, ValorParcela, Quitada, Parcelas, Desconto) 
+VALUES(15192, 99917, 600, false, 5, 0);
+INSERT INTO PAGAMENTO(Codigo, CodigoNegociacao, ValorParcela, Quitada, Parcelas, Desconto) 
+VALUES(87932, 99916, 500, false, 3, 0);
+INSERT INTO PAGAMENTO(Codigo, CodigoNegociacao, ValorParcela, Quitada, Parcelas, Desconto) 
+VALUES(97621, 99915, 295, false, 2, 0);
+INSERT INTO PAGAMENTO(Codigo, CodigoNegociacao, ValorParcela, Quitada, Parcelas, Desconto) 
+VALUES(97622, 99914, 360, false, 5, 0);
+INSERT INTO PAGAMENTO(Codigo, CodigoNegociacao, ValorParcela, Quitada, Parcelas, Desconto) 
+VALUES(97623, 99913, 95.04, true, 1, 10.56);
+
+INSERT INTO GERENTE_Realiza_NEGOCIACAO(CodigoGerente, CodigoNegociacao, Data) 
+VALUES(77778, 99914, '02/03/2017');
+INSERT INTO GERENTE_Realiza_NEGOCIACAO(CodigoGerente, CodigoNegociacao, Data) 
+VALUES(77779, 99916, '05/03/2017');
+INSERT INTO GERENTE_Realiza_NEGOCIACAO(CodigoGerente, CodigoNegociacao, Data) 
+VALUES(77710, 99917, '08/03/2017');
+INSERT INTO GERENTE_Realiza_NEGOCIACAO(CodigoGerente, CodigoNegociacao, Data) 
+VALUES(77711, 99915, '01/03/2017');
+INSERT INTO GERENTE_Realiza_NEGOCIACAO(CodigoGerente, CodigoNegociacao, Data) 
+VALUES(77711, 99914, '01/03/2017');
+INSERT INTO GERENTE_Realiza_NEGOCIACAO(CodigoGerente, CodigoNegociacao, Data) 
+VALUES(77779, 99913, '01/03/2017');
+
+INSERT INTO PRODUTO(Codigo, Preco, Nome, Marca, Quantidade) 
+VALUES(10101, 450, 'Whey Protein', 'Optimum Nutrition', 2);
+INSERT INTO PRODUTO(Codigo, Preco, Nome, Marca, Quantidade) 
+VALUES(20202, 300, 'Fat Destroyer', 'Atlhetica Nutrition', 1);
+INSERT INTO PRODUTO(Codigo, Preco, Nome, Marca, Quantidade) 
+VALUES(30303, 150, 'Fat Destroyer', 'Atlhetica Nutrition', 15);
+INSERT INTO PRODUTO(Codigo, Preco, Nome, Marca, Quantidade) 
+VALUES(40404, 150, 'Turbo Force', 'Uni Flora', 10);
+INSERT INTO PRODUTO(Codigo, Preco, Nome, Marca, Quantidade) 
+VALUES(50505, 118, 'Bar Ultimate Fire Black', 'Max Titanium', 5);
+INSERT INTO PRODUTO(Codigo, Preco, Nome, Marca, Quantidade) 
+VALUES(60606, 300, 'Whey Protein', 'Max Titanium', 6);
+INSERT INTO PRODUTO(Codigo, Preco, Nome, Marca, Quantidade) 
+VALUES(70707, 8.80, 'Pasta Amendoin 33g proteina', 'Body Action', 12);
+
+INSERT INTO NEGOCIACAO_Contem_PRODUTO(CodigoNegociacao, CodigoProduto) 
+VALUES(99999, 10101);
+INSERT INTO NEGOCIACAO_Contem_PRODUTO(CodigoNegociacao, CodigoProduto) 
+VALUES(99918, 20202);
+INSERT INTO NEGOCIACAO_Contem_PRODUTO(CodigoNegociacao, CodigoProduto) 
+VALUES(99917, 30303);
+INSERT INTO NEGOCIACAO_Contem_PRODUTO(CodigoNegociacao, CodigoProduto) 
+VALUES(99916, 40404);
+INSERT INTO NEGOCIACAO_Contem_PRODUTO(CodigoNegociacao, CodigoProduto) 
+VALUES(99915, 50505);
+INSERT INTO NEGOCIACAO_Contem_PRODUTO(CodigoNegociacao, CodigoProduto) 
+VALUES(99914, 60606);
+INSERT INTO NEGOCIACAO_Contem_PRODUTO(CodigoNegociacao, CodigoProduto) 
+VALUES(99913, 70707);
+
+INSERT INTO MEDIDAS(Codigo, Abdome, CoxaDireita, CoxaEsquerda, BracoDireito, BracoEsquerdo, Peitoral, AntebracoDireito, AntebracoEsquerdo, Deltoides, PanturrilhaEsquerda, PanturrilhaDireita) 
+VALUES(12345, 90, 54, 53, 36, 38, 100, 25, 26, 50, 40, 38);
+INSERT INTO MEDIDAS(Codigo, Abdome, CoxaDireita, CoxaEsquerda, BracoDireito, BracoEsquerdo, Peitoral, AntebracoDireito, AntebracoEsquerdo, Deltoides, PanturrilhaEsquerda, PanturrilhaDireita)  
+VALUES(67891, 85, 52, 50, 37, 36, 97, 24, 23, 60, 39, 38);
+INSERT INTO MEDIDAS(Codigo, Abdome, CoxaDireita, CoxaEsquerda, BracoDireito, BracoEsquerdo, Peitoral, AntebracoDireito, AntebracoEsquerdo, Deltoides, PanturrilhaEsquerda, PanturrilhaDireita)  
+VALUES(10111, 60, 52, 51, 24, 25, 88, 22, 23, 40, 36, 35);
+INSERT INTO MEDIDAS(Codigo, Abdome, CoxaDireita, CoxaEsquerda, BracoDireito, BracoEsquerdo, Peitoral, AntebracoDireito, AntebracoEsquerdo, Deltoides, PanturrilhaEsquerda, PanturrilhaDireita)  
+VALUES(12131, 95, 55, 54, 39, 38, 102, 29, 28, 52, 33, 34);
+INSERT INTO MEDIDAS(Codigo, Abdome, CoxaDireita, CoxaEsquerda, BracoDireito, BracoEsquerdo, Peitoral, AntebracoDireito, AntebracoEsquerdo, Deltoides, PanturrilhaEsquerda, PanturrilhaDireita)  
+VALUES(14151, 62, 51, 52, 23, 24, 86, 24, 25, 43, 32, 31);
+
+INSERT INTO PROFESSOR_ALUNO(CodigoProfessor, CodigoMedidas, CodigoAluno, Data) 
+VALUES(66666, 12345, 11111, '01/04/2017');
+INSERT INTO PROFESSOR_ALUNO(CodigoProfessor, CodigoMedidas, CodigoAluno, Data) 
+VALUES(66667, 67891, 11112, '02/04/2017');
+INSERT INTO PROFESSOR_ALUNO(CodigoProfessor, CodigoMedidas, CodigoAluno, Data) 
+VALUES(66668, 10111, 11113, '03/04/2017');
+INSERT INTO PROFESSOR_ALUNO(CodigoProfessor, CodigoMedidas, CodigoAluno, Data) 
+VALUES(66669, 12131, 11114, '04/04/2017');
+INSERT INTO PROFESSOR_ALUNO(CodigoProfessor, CodigoMedidas, CodigoAluno, Data) 
+VALUES(66610, 14151, 11115, '05/04/2017');
+
+
+
+
+CREATE INDEX AlunoIndice ON ALUNO(Codigo);
+CREATE INDEX MatriculaIndice ON MATRICULA(Codigo);
+CREATE INDEX ProdutoIndice ON PRODUTO(Codigo);
+CREATE INDEX NegociacaoIndice ON NEGOCIACAO(Codigo);
+CREATE INDEX PagamentoIndice ON PAGAMENTO(Codigo);
+CREATE INDEX MensalidadeIndice ON MENSALIDADE(Codigo);
+CREATE INDEX TreinoIndice ON TREINO(Codigo);
+CREATE INDEX ExercicioIndice ON EXERCICIO(Codigo);
+CREATE INDEX ProfessorIndice ON PROFESSOR(Codigo);
+CREATE INDEX GerenteIndice ON GERENTE(Codigo);
+CREATE INDEX DespesaIndice ON DESPESA(Codigo);
+CREATE INDEX MedidasIndice ON MEDIDAS(Codigo);
+
+
+
+
+CREATE VIEW AlunosAtivos AS
+SELECT A.Codigo, A.Nome, A.Sexo, A.Idade, A.Telefone, M.DataTrancamento
+FROM ALUNO A, MATRICULA M
+WHERE A.Codigo = M.CodigoAluno AND
+M.DataTrancamento IS NULL OR 
+M.DataTrancamento > (SELECT CURRENT_DATE)
+ORDER BY A.Nome;
+
+CREATE VIEW ProfessoresDaAcademia AS
+SELECT CPF, Nome, Sexo
+FROM PROFESSOR 
+ORDER BY Sexo DESC;
+
+
+
+
+CREATE OR REPLACE FUNCTION BF(INT)
+RETURNS REAL AS '
+DECLARE
+	aluno ALUNO%ROWTYPE;
+	matricula ALIAS FOR $1;
+BEGIN
+	SELECT INTO aluno * FROM ALUNO
+	WHERE Codigo = matricula;
+    IF(aluno.Sexo = ''M'') THEN
+    	RETURN ((1.20*IMC(aluno.Codigo))+(0.23*aluno.Idade)-(10.8*1)-5.4);
+    END IF;
+    RETURN ((1.20*IMC(aluno.Codigo))+(0.23*aluno.Idade)-(10.8*0)-5.4);
+END
+' LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION IMC(INT)
+RETURNS REAL AS '
+DECLARE
+	aluno ALUNO%ROWTYPE;
+	matricula ALIAS FOR $1;
+BEGIN
+	SELECT INTO aluno * FROM ALUNO
+	WHERE Codigo = matricula;
+    	RETURN aluno.peso/(aluno.altura*aluno.altura);
+END
+' LANGUAGE plpgsql;
